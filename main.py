@@ -163,7 +163,7 @@ def visualize_model(model_path: str, algorithm: str = "DQN", num_episodes: int =
 
 if __name__ == "__main__":
     visualize_model(
-        model_path="logs_DQN-6/best_model.zip",
+        model_path="models/logs_DQN-6/best_model.zip",
         algorithm="DQN",
         num_episodes=3
     )
