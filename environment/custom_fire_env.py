@@ -70,7 +70,6 @@ class FireRescueEnv(gym.Env):
             "fires_remaining": spaces.Discrete(self.total_fires + 1),
         })
 
-    # ---------------------------------------------------------
     def _setup_fixed_elements(self):
         self.fire_locations = [(3.0, 7.0), (6.5, 4.5), (8.0, 2.0)]
         self.water_stations = [(1.5, 1.5), (8.5, 8.5)]
@@ -82,7 +81,6 @@ class FireRescueEnv(gym.Env):
             (4.5, 5.5), (5.0, 7.5)
         ]
 
-    # ---------------------------------------------------------
     def reset(self, seed: Optional[int] = None, options=None):
         super().reset(seed=seed)
 
@@ -108,7 +106,6 @@ class FireRescueEnv(gym.Env):
 
         return self._get_obs(), {}
 
-    # ---------------------------------------------------------
     def step(self, action: Dict):
 
         # Apply action
@@ -127,9 +124,7 @@ class FireRescueEnv(gym.Env):
             alignment = np.dot(self.robot_dir, dir_to_target)
             reward += 2.2 * max(0, alignment)
 
-        # ---------------------------------------------------------
-        # 2. Fire extinguish
-        # ---------------------------------------------------------
+        # Fire extinguish
         if self._at_location(self.robot_pos, [self.target_location]):
 
             if self.water_level >= self.water_usage_rate:
@@ -139,9 +134,6 @@ class FireRescueEnv(gym.Env):
                 reward += 650 + (200 * self.fires_extinguished)
                 status = f"Fire {self.fires_extinguished} extinguished!"
 
-                # ---------------------------------------------
-                # FIX 1: Remove EXACT extinguished fire
-                # ---------------------------------------------
                 extinguished_fire = self.target_location
                 self.active_fires.remove(extinguished_fire)
 
@@ -161,34 +153,30 @@ class FireRescueEnv(gym.Env):
                 reward -= 6
                 status = "NO WATER"
 
-        # ---------------------------------------------------------
-        # 3. Water refill
-        # ---------------------------------------------------------
+        # Water refill
         elif self._at_location(self.robot_pos, self.water_sources):
             refill_reward = 250 * (1 - self.water_level / self.max_water)
             reward += refill_reward
             self.water_level = self.max_water
             status = "REFILLED"
 
-        # ---------------------------------------------------------
-        # 4. Distance improvement
-        # ---------------------------------------------------------
+        # Distance improvement
         dist = self._distance(self.robot_pos, self.target_location)
         improvement = self.last_distance - dist
         if improvement > 0:
             reward += 14 * improvement
         self.last_distance = dist
 
-        # 5. Collision
+        # Collision
         if self._collision():
             reward -= 150
             terminated = True
             status = "COLLISION"
 
-        # 6. Time penalty
+        # Time penalty
         reward -= 0.05
 
-        # 7. Timeout
+        # Timeout
         if self.time_elapsed >= self.time_limit:
             truncated = True
             reward += 120 * self.fires_extinguished
@@ -199,7 +187,6 @@ class FireRescueEnv(gym.Env):
 
         return self._get_obs(), reward, terminated, truncated, {"status": status}
 
-    # ---------------------------------------------------------
     def _apply_action(self, action):
         steering = int(action["steering"])
         throttle = int(action["throttle"])
@@ -237,7 +224,6 @@ class FireRescueEnv(gym.Env):
         if self._valid_pos(new_pos):
             self.robot_pos = new_pos
 
-    # ---------------------------------------------------------
     def _get_obs(self):
         return {
             "position": np.array(self.robot_pos, dtype=np.float32),
@@ -248,15 +234,11 @@ class FireRescueEnv(gym.Env):
             "obstacles": np.array(self.obstacles[:5], dtype=np.float32),
             "wheel_angle": np.array([self.wheel_angle], dtype=np.float32),
 
-            # ---------------------------------------------
-            # FIX 2: Correct fire counter
-            # ---------------------------------------------
             "fires_remaining": np.array(
                 [len(self.active_fires)], dtype=np.int32
             ),
         }
 
-    # ---------------------------------------------------------
     def _valid_pos(self, pos):
         return (
             self.min_x <= pos[0] <= self.max_x and
@@ -276,7 +258,6 @@ class FireRescueEnv(gym.Env):
         dists = [self._distance(self.robot_pos, f) for f in self.active_fires]
         return self.active_fires[np.argmin(dists)]
 
-    # ---------------------------------------------------------
     def render(self):
         if self.render_mode == "human":
             from environment.rendering import FireRescueVisualizer
