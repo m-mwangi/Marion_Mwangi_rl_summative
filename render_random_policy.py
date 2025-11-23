@@ -3,9 +3,6 @@ import numpy as np
 import time
 from environment.custom_fire_env import FireRescueEnv
 
-# ---------------------------------------------------------
-#  SAME ACTION WRAPPER AS TRAINING
-# ---------------------------------------------------------
 class FlattenActionWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super().__init__(env)
@@ -26,11 +23,9 @@ def make_env():
     env = FlattenActionWrapper(env)
     return env
 
-# ---------------------------------------------------------
-#  RANDOM AGENT DEMO
-# ---------------------------------------------------------
+# RANDOM AGENT DEMO
 def run_random_demo(steps=300):
-    print("\n🔥 STATIC DEMONSTRATION: RANDOM AGENT")
+    print("\nSTATIC DEMONSTRATION: RANDOM AGENT")
     print("Agent is taking random actions (NO RL model)")
     print("Showing environment functionality & OpenGL components\n")
 
